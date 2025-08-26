@@ -9,8 +9,7 @@ venv/
 # Data & Models - Exclude large files from Git
 # It's better to provide instructions on how to generate or download them.
 data/raw_ais/
-data/processed/
-models/
+
 
 # Jupyter Notebooks
 .ipynb_checkpoints/
