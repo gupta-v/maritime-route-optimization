@@ -1,0 +1,17 @@
+torch
+torch-geometric
+gym
+pandas
+geopandas
+numpy
+matplotlib
+seaborn
+plotly
+scikit-learn
+tqdm
+openmeteo-requests
+requests-cache
+retry-requests
+networkx
+joblib
+shapely
