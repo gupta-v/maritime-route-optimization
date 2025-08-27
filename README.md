@@ -1,5 +1,7 @@
 # Maritime Route Optimization with Graph Neural Networks and Reinforcement Learning
 
+> **Version 1.0 - Research Foundation & Technical Infrastructure**
+
 > **Research Goal**: Develop a weather-aware maritime routing system that learns from historical AIS demonstrations and optimizes routes for safety and efficiency using graph-based machine learning agents.
 
 This repository presents a comprehensive two-stage pipeline combining Graph Neural Networks (GNNs) with Reinforcement Learning (RL) to address maritime navigation challenges. The system models oceanic environments as navigable graphs and applies advanced machine learning techniques to discover optimal routing policies that balance travel efficiency with safety considerations.
