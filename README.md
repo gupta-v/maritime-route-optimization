@@ -563,15 +563,6 @@ The system leverages parallel processing where appropriate:
 
 ### Training Performance Analysis
 
-### Results (Generated Plots)
-
-![Result 1](output/route_comparison_plot.png)  
-![Result 2](output/route_comparison_plot1.png)  
-![Result 3](output/route_comparison_plot2.png)  
-![Result 4](output/route_comparison_plot3.png)  
-![Result 5](output/route_comparison_plot4.png)  
-![Result 6](output/route_comparison_plot5.png)
-
 ### Imitation Learning Results
 
 The supervised pre-training phase demonstrated strong convergence characteristics:
@@ -593,6 +584,15 @@ The RL fine-tuning phase showed gradual but consistent improvement:
   - Episodes 2,700-3,000: Stabilization around -1,900 to -2,200 (exploitation phase)
 
 ### Route Comparison Analysis
+
+### Results (Generated Plots)
+
+![Result 1](output/route_comparison_plot.png)  
+![Result 2](output/route_comparison_plot1.png)  
+![Result 3](output/route_comparison_plot2.png)  
+![Result 4](output/route_comparison_plot3.png)  
+![Result 5](output/route_comparison_plot4.png)  
+![Result 6](output/route_comparison_plot5.png)
 
 Based on the generated visualizations, several key patterns emerge:
 
