@@ -561,6 +561,8 @@ The system leverages parallel processing where appropriate:
 
 ## Results and Analysis
 
+### Training Performance Analysis
+
 ### Results (Generated Plots)
 
 ![Result 1](output/route_comparison_plot.png)  
@@ -570,138 +572,188 @@ The system leverages parallel processing where appropriate:
 ![Result 5](output/route_comparison_plot4.png)  
 ![Result 6](output/route_comparison_plot5.png)
 
-### Route Comparison Visualizations
+### Imitation Learning Results
 
-The system generates comprehensive route comparison plots showing:
+The supervised pre-training phase demonstrated strong convergence characteristics:
 
-**Sea Graph Overlay**: Complete navigable network as background context
-**Historical AIS Path**: Actual vessel trajectory (red dashed line)
-**Imitation Path**: Supervised learning model output (blue dotted line)  
-**RL Agent Path**: Final reinforcement learning route (green solid line)
-**Geographic Markers**: Start (orange) and destination (purple) points
+- **Initial Loss**: 2.1883 (Epoch 1)
+- **Final Loss**: 0.1199 (Epoch 50)
+- **Convergence Pattern**: Rapid initial improvement (2.19 → 0.65 in 3 epochs), then steady refinement
+- **Training Stability**: Smooth convergence without significant oscillations, indicating appropriate learning rate selection
 
-### Performance Analysis
+### Reinforcement Learning Results
 
-**Route Length Comparison**:
+The RL fine-tuning phase showed gradual but consistent improvement:
 
-```
-Method                | Avg Length (km) | Std Dev | Success Rate
-Historical Routes     | 156.3          | 23.7    | 100%
-Shortest Path        | 142.8          | 18.2    | 100%
-Imitation Learning   | 178.9          | 31.4    | 73%
-RL Agent             | 167.2          | 26.1    | 95%
-```
+- **Training Episodes**: 3,000 episodes over 4 hours 14 minutes
+- **Epsilon Decay**: Successfully reduced from ~0.814 to 0.050, enabling transition from exploration to exploitation
+- **Reward Progression**:
+  - Episodes 100-500: Average rewards around -2,800 to -3,500 (exploration phase)
+  - Episodes 1,000-2,000: Improvement to -1,900 to -2,600 range (learning phase)
+  - Episodes 2,700-3,000: Stabilization around -1,900 to -2,200 (exploitation phase)
 
-**Weather Avoidance Performance**:
+### Route Comparison Analysis
 
-- **High Wave Avoidance**: RL agent reduces exposure to >3m waves by 34%
-- **Current Avoidance**: 28% reduction in strong current exposure
-- **Safety Improvement**: 22% improvement in composite safety score
+Based on the generated visualizations, several key patterns emerge:
 
-### Learning Curves and Convergence
+#### Path Efficiency Comparison
 
-**Imitation Learning Convergence**:
+**Observed Route Characteristics**:
 
-- Training loss decreases from 4.2 to 0.8 over 50 epochs
-- Validation accuracy reaches 67% for next-node prediction
-- Overfitting observed after epoch 40, controlled with early stopping
+- **Historical AIS Routes**: Variable lengths (52-1,341 steps), showing diverse real-world navigation strategies
+- **AI Models**: Consistently hitting maximum episode length (1,001 steps), indicating conservative/exploratory behavior
+- **Route Diversity**: Each approach shows distinct path selection, with varying degrees of directness
 
-**Reinforcement Learning Progress**:
+#### Navigation Behavior Patterns
 
-- Episode rewards increase from -150 to +280 over 3000 episodes
-- Epsilon-greedy exploration reduces successfully from 0.9 to 0.05
-- Target network updates stabilize Q-value learning
-- Replay buffer reaches capacity after 400 episodes
+**Historical Routes (Red Dashed)**:
 
-### Behavioral Analysis
+- Show pragmatic, often direct paths
+- Demonstrate human operators' preference for efficiency
+- Variable complexity based on specific journey requirements
 
-**Weather Response Patterns**:
+**Imitation Learning (Blue Dotted)**:
 
-- Agent learns to circumnavigate high wave regions when possible
-- Trade-off between route length and weather avoidance is evident
-- More conservative behavior in complex weather patterns
+- Attempts to replicate human patterns but with some inefficiencies
+- Shows learned spatial relationships from training data
+- 1,001-step limitation suggests incomplete trajectory optimization
 
-**Navigation Strategies**:
+**Reinforcement Learning (Green Solid)**:
 
-- Preference for established shipping lanes when available
-- Adaptive behavior based on weather severity
-- Improved long-horizon planning compared to imitation learning
+- Displays more systematic exploration patterns
+- Often takes circuitous routes, indicating over-conservative safety behavior
+- Consistent maximum-length episodes suggest reward function may penalize direct routes too heavily
 
 ## Research Insights and Discussion
 
 ### Key Findings
 
-**Two-Stage Learning Effectiveness**: The imitation-to-reinforcement learning pipeline provides stable initialization while enabling policy optimization beyond human performance. Transfer learning preserves navigational knowledge while allowing safety improvements.
+**Two-Stage Learning Validation**: The pipeline successfully demonstrates knowledge transfer from imitation to reinforcement learning. The RL agent's consistent behavior (though conservative) indicates that pre-trained weights provided stable initialization.
 
-**Graph Neural Network Benefits**: GNN architecture effectively captures spatial dependencies in maritime navigation. Neighborhood aggregation enables context-aware decision making that outperforms position-only models.
+**Weather Integration Impact**: While quantitative weather avoidance metrics require additional analysis, the systematic route patterns suggest the models are responding to environmental features rather than purely geometric considerations.
 
-**Weather Integration Impact**: Dynamic weather consideration leads to measurably safer routes with acceptable efficiency trade-offs. The quadratic penalty for wave height effectively discourages navigation through dangerous conditions.
+**Reward Function Analysis**: The consistent maximum-episode behavior (1,001 steps) across AI models indicates the current reward structure may over-penalize direct routes. This suggests:
 
-**Reward Function Sensitivity**: Current reward balance tends toward over-conservative behavior, suggesting need for multi-objective optimization approaches to better balance safety and efficiency.
+- Step penalty (-0.2 per timestep) may be too small relative to other penalties
+- Weather penalties might be too aggressive, causing excessive avoidance behavior
+- Terminal reward (+500) insufficient to encourage direct path-finding
+
+### Performance Limitations Identified
+
+**Route Efficiency**: Both AI approaches generate significantly longer routes than historical data, indicating:
+
+- Possible over-fitting to safety considerations
+- Insufficient reward for progress toward destination
+- Need for multi-objective optimization balance
+
+**Training Convergence**: RL rewards plateaued around -2,000, suggesting:
+
+- Local optima in policy space
+- Possible need for curriculum learning approaches
+- Alternative exploration strategies (e.g., curiosity-driven exploration)
 
 ### Algorithmic Insights
 
-**Exploration vs. Exploitation**: Epsilon-greedy strategy proves effective for maritime domain where local optima are less problematic than in discrete action spaces.
+**Exploration vs. Exploitation Balance**: The epsilon-greedy strategy successfully reduced exploration over time, but final performance suggests the learned policy may be sub-optimal for route efficiency.
 
-**Experience Replay Benefits**: Replay buffer enables stable learning from diverse weather conditions and trajectory types, improving generalization.
+**Graph Neural Network Benefits**: The consistent spatial patterns in generated routes demonstrate that GNNs successfully capture neighborhood relationships in maritime navigation.
 
-**Target Network Stabilization**: Regular target network updates prevent divergence in Q-learning, particularly important given the large state space.
-
-### Domain-Specific Observations
-
-**Human Navigation Patterns**: AIS data reveals consistent patterns in maritime navigation that align with safety protocols and operational efficiency considerations.
-
-**Weather Prediction Challenges**: Static weather snapshots limit realism; dynamic forecasting integration represents critical next step for operational deployment.
-
-**Scale Considerations**: Grid resolution affects both computational requirements and route precision; 0.05° represents reasonable balance for regional navigation.
+**Transfer Learning Success**: The smooth transition from pre-training (loss: 2.19 → 0.12) to RL fine-tuning (rewards: -3,500 → -2,000) indicates effective knowledge transfer.
 
 ## Limitations and Challenges
 
-### Current System Limitations
+### Observed System Limitations
 
-**Temporal Weather Modeling**: Static weather snapshots fail to capture dynamic conditions that vessels encounter during multi-day journeys. Real maritime routing requires weather forecasting and time-dependent planning.
+**Route Optimality**: Current AI models generate routes 1.5-2x longer than historical trajectories, indicating:
 
-**Grid Resolution Constraints**: 0.05° spacing (≈5.5km) limits fine-grained route optimization near ports, straits, and coastal areas where precision navigation is critical.
+- Over-conservative safety behavior
+- Insufficient progress incentivization
+- Need for reward function rebalancing
 
-**Simplified Vessel Dynamics**: The model treats all vessels identically, ignoring significant differences in size, draft, speed, and weather response characteristics that affect real navigation decisions.
+**Episode Termination**: Consistent maximum-episode-length termination suggests:
 
-**Reward Function Tuning**: Current reward balance produces overly conservative routes, indicating need for more sophisticated multi-objective optimization approaches.
+- Poor convergence to destination
+- Possible environment design issues
+- Need for adaptive episode length based on distance
 
-### Data Quality Challenges
+**Weather Response**: While weather integration is implemented, quantitative analysis of weather avoidance behavior requires additional metrics development.
 
-**AIS Data Gaps**: Satellite AIS coverage has gaps in remote ocean areas, and terrestrial AIS range is limited to coastal regions, creating incomplete trajectory data.
+### Training Efficiency Concerns
 
-**Weather Data Limitations**: Point-based weather measurements may not capture local phenomena like wind shadows, tidal effects, or microclimates that influence vessel navigation.
+**Computational Cost**: 4+ hours for 3,000 episodes indicates scalability challenges for:
 
-**Trajectory Noise**: Raw AIS data contains position errors, timestamp inconsistencies, and vessel identification problems that complicate trajectory extraction.
+- Larger geographic regions
+- More complex weather models
+- Real-time operational deployment
 
-### Scalability Concerns
+**Sample Efficiency**: The gradual improvement curve suggests need for:
 
-**Computational Complexity**: Graph neural networks scale quadratically with node count, limiting application to larger geographic regions without hierarchical approaches.
-
-**Memory Requirements**: Storing weather data and graph features for large-scale deployments requires careful memory management and distributed computing strategies.
-
-**Training Time**: Reinforcement learning requires extensive interaction with the environment, making training on larger graphs computationally expensive.
-
-### Research Methodology Limitations
-
-**Limited Geographic Scope**: Results from the Guam region may not generalize to other maritime environments with different weather patterns, traffic densities, or bathymetric characteristics.
-
-**Evaluation Metrics**: Current evaluation focuses on route length and weather exposure but lacks comprehensive operational metrics like fuel consumption, schedule adherence, and crew comfort.
-
-**Baseline Comparisons**: Limited comparison with other state-of-the-art maritime routing systems due to proprietary nature of commercial navigation software.
+- More sophisticated exploration strategies
+- Hierarchical reinforcement learning approaches
+- Better reward shaping techniques
 
 ## Future Research Directions
 
-### Immediate Technical Extensions
+### Immediate Technical Improvements
 
-**Dynamic Weather Integration**: Replace static weather snapshots with time-series forecasts, enabling the agent to plan routes considering weather evolution during transit.
+**Reward Function Redesign**:
 
-**Hierarchical Route Planning**: Implement two-level optimization where a strategic planner selects waypoints and a tactical planner handles local navigation, addressing long-horizon credit assignment problems.
+- Increase progress rewards relative to safety penalties
+- Implement dynamic reward scaling based on journey phase
+- Add explicit distance-to-target incentives
 
-**Multi-Objective Optimization**: Develop Pareto-optimal routing that explicitly trades off safety, time, fuel consumption, and operational constraints rather than using weighted rewards.
+**Training Efficiency Enhancements**:
 
-**Uncertainty Quantification**: Incorporate weather forecast uncertainty and model confidence intervals into routing decisions.
+- Implement curiosity-driven exploration
+- Develop hierarchical route planning (strategic + tactical)
+- Investigate policy gradient methods (PPO, A3C) for better convergence
+
+**Evaluation Methodology**:
+
+- Develop comprehensive safety vs. efficiency metrics
+- Quantify weather avoidance behavior
+- Implement statistical significance testing across multiple random seeds
+
+### Research Questions for Investigation
+
+1. **Optimal Reward Balance**: What reward function parameters achieve human-level route efficiency while maintaining safety improvements?
+
+2. **Weather Response Validation**: How can we quantitatively measure and validate weather-aware routing behavior?
+
+3. **Scalability Analysis**: How does performance degrade with larger geographic regions and more complex environmental conditions?
+
+4. **Real-World Validation**: How do simulation results translate to actual maritime operational conditions?
+
+## Experimental Validation Recommendations
+
+### Additional Metrics Development
+
+**Safety Metrics**:
+
+- Weather exposure scores (wave height, current strength)
+- Route deviation in hazardous conditions
+- Comparative safety analysis vs. historical routes
+
+**Efficiency Metrics**:
+
+- Route directness ratio (actual distance / optimal distance)
+- Time-to-destination estimates
+- Fuel consumption modeling integration
+
+**Learning Metrics**:
+
+- Convergence analysis across multiple training runs
+- Generalization testing on unseen route pairs
+- Transfer learning effectiveness quantification
+
+### Statistical Validation Requirements
+
+- **Multiple Random Seeds**: Train and evaluate across 5-10 different random initializations
+- **Cross-Validation**: Test on held-out trajectories from different time periods
+- **Ablation Studies**: Systematic component removal to validate architectural choices
+- **Baseline Comparisons**: Implementation of additional routing algorithms (A\*, genetic algorithms)
+
+This analysis reveals that while the technical infrastructure is sound, the current reward function and training configuration require refinement to achieve practical maritime routing performance. The consistent behavior patterns indicate successful learning, but optimization objectives need rebalancing for operational effectiveness.
 
 ### Advanced Algorithmic Development
 
